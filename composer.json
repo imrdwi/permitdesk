@@ -1,12 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "imrdwi/permitdesk",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": [
-        "laravel",
-        "framework"
-    ],
+    "description": "Practice-permit applications, review and QR-verifiable permits for a licensing office.",
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -66,7 +62,7 @@
             "@test"
         ],
         "types:check": [
-            "phpstan analyse"
+            "phpstan analyse --memory-limit=1G"
         ],
         "test": [
             "@php artisan config:clear --ansi",
@@ -79,7 +75,6 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan install:features --ansi",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
@@ -99,7 +94,6 @@
             "dont-discover": [],
             "installer": {
                 "post-create-project": [
-                    "@php artisan install:features --ansi"
                 ]
             }
         }
