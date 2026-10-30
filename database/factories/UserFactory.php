@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\ApplicantProfile;
 use App\Models\User;
+use App\Profession;
+use App\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -30,11 +33,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            /* @chisel-2fa */
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
-            /* @end-chisel-2fa */
+            'role' => UserRole::Applicant,
+            'profession' => Profession::Doctor,
         ];
     }
 
@@ -48,7 +51,6 @@ class UserFactory extends Factory
         ]);
     }
 
-    /* @chisel-2fa */
     /**
      * Indicate that the model has two-factor authentication configured.
      */
@@ -60,5 +62,42 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => now(),
         ]);
     }
-    /* @end-chisel-2fa */
+
+    public function head(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => UserRole::Head, 'profession' => null]);
+    }
+
+    public function staff(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => UserRole::Staff, 'profession' => null]);
+    }
+
+    public function applicant(Profession $profession = Profession::Doctor): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => UserRole::Applicant, 'profession' => $profession])
+            ->afterCreating(function (User $user) use ($profession): void {
+                ApplicantProfile::factory()->for($user)->create($profession === Profession::Student
+                    ? ['license_number' => null, 'license_expires_on' => null, 'university' => 'Universitas '.fake()->lastName()]
+                    : []);
+            });
+    }
+
+    /**
+     * An applicant who has uploaded every document their profession requires.
+     */
+    public function withAllDocuments(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            foreach ($user->profession?->requiredDocuments() ?? [] as $type) {
+                $user->documents()->create([
+                    'type' => $type,
+                    'path' => "documents/{$user->id}/{$type->value}.pdf",
+                    'original_name' => "{$type->value}.pdf",
+                    'mime_type' => 'application/pdf',
+                    'size' => 120_000,
+                ]);
+            }
+        });
+    }
 }
