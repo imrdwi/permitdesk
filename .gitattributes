@@ -9,3 +9,6 @@
 CHANGELOG.md export-ignore
 README.md export-ignore
 .github/workflows/browser-tests.yml export-ignore
+
+# Generated shadcn-vue components: keep them out of the language stats.
+resources/js/components/ui/** linguist-vendored
