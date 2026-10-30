@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import NativeSelect from '@/components/admin/NativeSelect.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -12,12 +13,14 @@ import { store } from '@/routes/register';
 
 defineProps<{
     passwordRules: string;
+    professions: { value: string; label: string }[];
 }>();
 
 defineOptions({
     layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
+        title: 'Apply for a practice permit',
+        description:
+            'Create an account to submit and track your permit applications',
     },
 });
 </script>
@@ -45,6 +48,23 @@ defineOptions({
                     placeholder="Full name"
                 />
                 <InputError :message="errors.name" />
+            </div>
+
+            <div class="grid gap-2">
+                <Label for="profession">I am applying as</Label>
+                <NativeSelect id="profession" name="profession" required>
+                    <option value="" disabled selected>
+                        Choose your profession
+                    </option>
+                    <option
+                        v-for="profession in professions"
+                        :key="profession.value"
+                        :value="profession.value"
+                    >
+                        {{ profession.label }}
+                    </option>
+                </NativeSelect>
+                <InputError :message="errors.profession" />
             </div>
 
             <div class="grid gap-2">
